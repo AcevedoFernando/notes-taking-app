@@ -1,0 +1,37 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  Tech stack: Python 3.12+, Django 5.x, Django REST Framework, PostgreSQL, JWT via djangorestframework-simplejwt, OpenAPI via drf-spectacular.
+
+  Architectural principles:
+  - All business logic lives in api/services/ (Service Layer pattern).
+  - UUID4 as Primary Keys for User and Note entities.
+  - ATOMIC_REQUESTS = True for data integrity.
+  - Strict avoidance of N+1 queries (select_related, prefetch_related, annotate).
+
+  Domain model:
+  - User: id (UUID PK), email (EmailField, unique, indexed), password (hashed)
+  - Category: id (AutoField), name (CharField 100), color (CharField 7, hex), user (ForeignKey User, related_name='categories'), unique_together = ('name', 'user')
+  - Note: id (UUID PK), user (ForeignKey User, related_name='notes'), category (ForeignKey Category, null=True, SET_NULL), title (CharField 255), content (TextField, HTML sanitized), is_pinned (Boolean, default False)
+
+  Testing stack: pytest-django, factory_boy + Faker (no static fixtures), pytest-cov (>90%), freezegun for timestamps, Schemathesis for contract testing.
+
+  Test structure:
+    /tests/conftest.py, /tests/factories/, tests/test_auth.py, tests/test_notes.py, tests/test_categories.py
+
+  Security: bleach for XSS on Note.content, IDOR protection (users own their own resources), stateless JWT only.
+
+  Onboarding: on registration, create 4 default categories (Random Thoughts #EF9C66, School #FCDC94, Personal #78ABA8, Drama #C8CFA0) inside a DB transaction.
+
+  Error responses follow: {"error": "ERROR_CODE", "message": "...", "fields": {...}}
+
+  See CONTEXT.md for full details.
+
+# Per-artifact rules (optional)
+# rules:
+#   proposal:
+#     - Keep proposals under 500 words
+#   tasks:
+#     - Break tasks into chunks of max 2 hours
