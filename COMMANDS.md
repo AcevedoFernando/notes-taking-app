@@ -56,6 +56,8 @@ Located in the `./web` directory.
 - **E2E UI Mode:** `pnpm test:e2e:ui`
 - **E2E Report:** `pnpm test:e2e:report`
 
+> **NOTE:** For E2E tests to work, make sure the web application and API are running, and ensure `E2E_TEST_USER_EMAIL` and `E2E_TEST_USER_PASSWORD` are set in the `.env` file.
+
 ### 🎨 Storybook
 - **Start Storybook:** `pnpm storybook` (Runs on port 6006)
 - **Build Storybook:** `pnpm build-storybook`

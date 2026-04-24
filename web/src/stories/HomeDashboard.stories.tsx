@@ -68,7 +68,10 @@ const meta: Meta<typeof HomeDashboard> = {
   title: 'Organisms/HomeDashboard',
   component: HomeDashboard,
   tags: ['autodocs'],
-  parameters: { layout: 'fullscreen' },
+  parameters: {
+    layout: 'fullscreen',
+    nextjs: { appDirectory: true },
+  },
 };
 export default meta;
 type Story = StoryObj<typeof HomeDashboard>;

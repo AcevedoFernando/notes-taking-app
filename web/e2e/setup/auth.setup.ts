@@ -4,12 +4,12 @@ import path from 'path';
 const AUTH_FILE = path.join(__dirname, '../.auth/user.json');
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api';
-const TEST_EMAIL = process.env.TEST_EMAIL ?? '';
-const TEST_PASSWORD = process.env.TEST_PASSWORD ?? '';
+const TEST_EMAIL = process.env.E2E_TEST_USER_EMAIL ?? '';
+const TEST_PASSWORD = process.env.E2E_TEST_USER_PASSWORD ?? '';
 
 setup('authenticate', async ({ page }) => {
   if (!TEST_EMAIL || !TEST_PASSWORD) {
-    throw new Error('Set TEST_EMAIL and TEST_PASSWORD env vars before running E2E tests.');
+    throw new Error('Set E2E_TEST_USER_EMAIL and E2E_TEST_USER_PASSWORD env vars before running E2E tests.');
   }
 
   const res = await page.request.post(`${API_URL}/auth/token/`, {

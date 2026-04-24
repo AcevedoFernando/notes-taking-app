@@ -4,7 +4,7 @@ import { UserProfile } from '../components/molecules/UserProfile';
 import type { User } from '../types';
 
 function withUser(user: User | undefined) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
   if (user) client.setQueryData(['me'], user);
 
   return function Decorator(Story: React.ComponentType) {
@@ -22,6 +22,11 @@ const meta: Meta<typeof UserProfile> = {
   title: 'Molecules/UserProfile',
   component: UserProfile,
   tags: ['autodocs'],
+  parameters: {
+    nextjs: {
+      appDirectory: true,
+    },
+  },
 };
 export default meta;
 type Story = StoryObj<typeof UserProfile>;

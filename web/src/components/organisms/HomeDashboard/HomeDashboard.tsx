@@ -22,7 +22,7 @@ export function HomeDashboard() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const { data: categoriesData } = useCategories();
   const categories = useMemo(() => categoriesData?.results ?? [], [categoriesData]);
-  const { data: notesData, fetchNextPage, hasNextPage, isFetchingNextPage } = useNotes(activeCategoryId || undefined);
+  const { data: notesData, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching: isNotesFetching } = useNotes(activeCategoryId || undefined);
   const notes = useMemo(() => notesData?.pages.flatMap((page) => page.results) ?? [], [notesData]);
 
   const openNote = useCallback((note: Note) => {
@@ -38,8 +38,8 @@ export function HomeDashboard() {
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-base p-8 relative">
-      <div className="w-full flex justify-end pb-4">
+    <div className="h-screen w-full flex flex-col bg-base p-8 relative overflow-hidden">
+      <div className="w-full flex justify-end pb-4 shrink-0">
         <Button
           icon={<Plus size={18} />}
           onClick={openNewNote}
@@ -48,8 +48,8 @@ export function HomeDashboard() {
           New Note
         </Button>
       </div>
-      <div className="flex">
-        <aside className="w-1/5 flex flex-col gap-6">
+      <div className="flex flex-1 min-h-0">
+        <aside className="w-1/5 flex flex-col gap-6 overflow-y-auto pr-2">
           <CategoryFilters
             categories={categories}
             activeCategoryId={activeCategoryId}
@@ -57,7 +57,7 @@ export function HomeDashboard() {
           />
         </aside>
 
-        <main className="flex-1 ml-6">
+        <main className="flex-1 ml-6 h-full min-h-0">
           <NotesList
             notes={notes}
             categories={categories}
@@ -65,6 +65,7 @@ export function HomeDashboard() {
             onLoadMore={fetchNextPage}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
+            isLoading={!categoriesData || !notesData || (notes.length === 0 && isNotesFetching)}
           />
         </main>
 
