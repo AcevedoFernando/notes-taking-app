@@ -106,3 +106,24 @@ Running the project on any machine is straightforward thanks to the native Docke
   - **API:** Aims for over 90% coverage. Uses `pytest-django`, fake data generation tools like `factory_boy`/`Faker`, and even Property-Based Testing to validate the OpenAPI schema with `Schemathesis`.
 - **Django Services Layer:** A critical point of the architecture is that complex business logic (such as creating a user and chaining the creation of their 4 categories) **must not** reside in views or serializers. This logic must go inside the `/api/services/` directory.
 - **Web Package Management:** The frontend uses the `pnpm` tool instead of standard `npm` or `yarn` (evidenced by the `pnpm-lock.yaml` file). When you need to install packages, prefer `pnpm install <package>`.
+
+---
+
+## Workflow & AI Integration
+
+The foundations and major features of both the API and Web projects were built using **OpenSpec** and **Claude Code (Sonnet)**. 
+
+**OpenSpec** played a crucial role in the development process. By providing structured, clear, and strict specifications, it guided the AI assistants effectively, ensuring the generated code aligned perfectly with the intended architecture and business requirements. This specification-driven approach was instrumental in avoiding AI hallucinations and maintaining high code quality throughout the project.
+
+---
+
+## Time Investment & Breakdown
+
+The entire project took approximately **8 hours** to complete from start to finish. The effort was distributed as follows:
+
+- **20% Analysis**: Understanding requirements, setting up the initial architecture, and defining the data models.
+- **30% Design**: UI/UX design, creating the design system ("Notes Flow"), and planning component structures.
+- **40% Development**: 
+  - *30% AI-Assisted Development*: Utilizing Claude Code and OpenSpec for rapid implementation of foundations and core features.
+  - *10% Manual Development*: Fine-tuning, custom logic implementation, and resolving specific edge cases.
+- **10% Testing & Quality Assurance**: Writing unit tests, E2E flows, and manual validation.
