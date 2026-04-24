@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  /* Core Palette based on Context */
+  --base: #FAF1E3;
+  --foreground: #171717;
+  --primary: #88642A;
+  --secondary: #957139;
+}
+
+@theme inline {
+  --color-base: var(--base);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  
+  /* Typography mappings */
+  --font-sans: "Inter", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Inria Serif", ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--base);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  /* Tipografía */
+  .title-main {
+    @apply text-[48px] font-bold text-primary;
+  }
+  .title-note {
+    @apply font-serif text-[24px] font-bold;
+  }
+  .text-body {
+    @apply font-sans text-[12px] font-normal;
+  }
+  .text-meta {
+    @apply font-sans text-[12px];
+  }
+
+  .btn-outline {
+    @apply border border-secondary text-secondary transition-colors hover:bg-secondary/20 inline-flex items-center justify-center rounded-[46px];
+  }
+  .input-outline {
+    @apply border border-secondary bg-transparent focus:outline-none focus:ring-1 focus:ring-secondary placeholder:text-secondary/50;
+  }
+
+  .border-custom {
+    @apply border-[3px] border-base rounded-[11px];
+  }
+}
