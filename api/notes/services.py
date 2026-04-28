@@ -1,4 +1,5 @@
-from django.db.models import Count, Q, Model
+from django.db.models import Count, Model, Q
+from rest_framework.exceptions import PermissionDenied
 
 from notes.models import Category, Note
 
@@ -11,6 +12,13 @@ def _apply_update(instance: Model, validated_data: dict, extra_update_fields: li
     return instance
 
 
+def _ensure_category_owned(user, category) -> None:
+    if category is None:
+        return
+    if category.user_id != user.id:
+        raise PermissionDenied('Category does not belong to the current user.')
+
+
 def get_user_notes(user, filters=None):
     qs = Note.objects.filter(user=user).select_related('category')
     if filters:
@@ -20,14 +28,16 @@ def get_user_notes(user, filters=None):
         search = filters.get('search')
         if search:
             qs = qs.filter(Q(title__icontains=search) | Q(content__icontains=search))
-    return qs.order_by('-created_at')
+    return qs
 
 
 def create_note(user, validated_data: dict) -> Note:
+    _ensure_category_owned(user, validated_data.get('category'))
     return Note.objects.create(user=user, **validated_data)
 
 
 def update_note(instance: Note, validated_data: dict) -> Note:
+    _ensure_category_owned(instance.user, validated_data.get('category'))
     return _apply_update(instance, validated_data, extra_update_fields=['updated_at'])
 
 

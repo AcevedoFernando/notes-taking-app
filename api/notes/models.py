@@ -40,5 +40,12 @@ class Note(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at'], name='note_user_created_idx'),
+            models.Index(fields=['user', 'category'], name='note_user_category_idx'),
+        ]
+
     def __str__(self):
         return self.title

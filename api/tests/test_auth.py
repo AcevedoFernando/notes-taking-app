@@ -70,11 +70,23 @@ class TestRegistration:
         names = set(cats.values_list('name', flat=True))
         assert names == {'Random Thoughts', 'School', 'Personal', 'Drama'}
 
-    def test_duplicate_email_returns_400(self, client, register_url):
+    def test_duplicate_email_returns_neutral_201_without_tokens(self, client, register_url):
         UserFactory(email='dup@example.com')
+        users_before = User.objects.count()
         resp = client.post(register_url, {'email': 'dup@example.com', 'password': 'securepass'})
-        assert resp.status_code == 400
-        assert resp.data['error'] == 'VALIDATION_ERROR'
+        assert resp.status_code == 201
+        assert resp.data == {'detail': 'Registration received.'}
+        # No new user, no tokens issued, no extra categories created.
+        assert User.objects.count() == users_before
+        assert 'access' not in resp.data
+        assert 'refresh' not in resp.data
+
+    def test_duplicate_email_does_not_create_extra_categories(self, client, register_url):
+        existing = UserFactory(email='dup2@example.com')
+        cats_before = Category.objects.count()
+        client.post(register_url, {'email': 'dup2@example.com', 'password': 'securepass'})
+        assert Category.objects.count() == cats_before
+        assert Category.objects.filter(user=existing).count() == 0
 
     def test_short_password_returns_400(self, client, register_url):
         resp = client.post(register_url, {'email': 'short@example.com', 'password': 'abc'})
@@ -90,6 +102,11 @@ class TestRegistration:
         resp = client.post(register_url, {'email': 'nopass@example.com'})
         assert resp.status_code == 400
         assert 'password' in resp.data.get('fields', {})
+
+    def test_register_view_uses_auth_rate_throttle(self):
+        from core.throttles import AuthRateThrottle
+        from users.views import RegisterView
+        assert AuthRateThrottle in RegisterView.throttle_classes
 
 
 @pytest.mark.django_db

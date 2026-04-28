@@ -5,6 +5,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file: ./api/.env
 
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
   api:
     build: ./api
     command: python manage.py runserver 0.0.0.0:8000
@@ -13,8 +18,12 @@ services:
     ports:
       - "8000:8000"
     env_file: ./api/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings.dev
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       - db
+      - redis
 
   web:
     build: ./web
@@ -24,8 +33,11 @@ services:
     ports:
       - "3000:3000"
     env_file: ./web/.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8000/api
     depends_on:
       - api
 
 volumes:
   postgres_data:
+  redis_data:

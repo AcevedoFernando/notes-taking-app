@@ -15,9 +15,11 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=8, write_only=True)
 
     def validate_email(self, value):
-        value = value.lower()
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('A user with this email already exists.')
+        return value.lower()
+
+    def validate_password(self, value):
+        from django.contrib.auth.password_validation import validate_password
+        validate_password(value)
         return value
 
     def create(self, validated_data):

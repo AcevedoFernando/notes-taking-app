@@ -34,7 +34,8 @@ class TestListNotes:
         NoteFactory.create_batch(2, user=other)
         resp = auth_client(user).get(NOTES_URL)
         assert resp.status_code == 200
-        assert len(resp.data) == 3
+        assert resp.data['count'] == 3
+        assert len(resp.data['results']) == 3
 
     def test_filter_by_category(self):
         user = UserFactory()
@@ -43,8 +44,8 @@ class TestListNotes:
         NoteFactory(user=user, category=None)
         resp = auth_client(user).get(NOTES_URL, {'category': cat.pk})
         assert resp.status_code == 200
-        assert len(resp.data) == 1
-        assert resp.data[0]['category'] == cat.pk
+        assert resp.data['count'] == 1
+        assert str(resp.data['results'][0]['category']) == str(cat.pk)
 
     def test_search_by_title(self):
         user = UserFactory()
@@ -52,8 +53,8 @@ class TestListNotes:
         NoteFactory(user=user, title='Unrelated note')
         resp = auth_client(user).get(NOTES_URL, {'search': 'django'})
         assert resp.status_code == 200
-        assert len(resp.data) == 1
-        assert 'django' in resp.data[0]['title'].lower()
+        assert resp.data['count'] == 1
+        assert 'django' in resp.data['results'][0]['title'].lower()
 
     def test_search_by_content(self):
         user = UserFactory()
@@ -61,7 +62,7 @@ class TestListNotes:
         NoteFactory(user=user, title='Note B', content='irrelevant text')
         resp = auth_client(user).get(NOTES_URL, {'search': 'Python'})
         assert resp.status_code == 200
-        assert len(resp.data) == 1
+        assert resp.data['count'] == 1
 
     def test_unauthenticated_returns_401(self):
         resp = APIClient().get(NOTES_URL)
@@ -69,11 +70,11 @@ class TestListNotes:
 
     def test_notes_ordered_by_created_at_desc(self):
         user = UserFactory()
-        note_a = NoteFactory(user=user, title='First')
-        note_b = NoteFactory(user=user, title='Second')
+        NoteFactory(user=user, title='First')
+        NoteFactory(user=user, title='Second')
         resp = auth_client(user).get(NOTES_URL)
         assert resp.status_code == 200
-        titles = [n['title'] for n in resp.data]
+        titles = [n['title'] for n in resp.data['results']]
         assert titles.index('Second') < titles.index('First')
 
 

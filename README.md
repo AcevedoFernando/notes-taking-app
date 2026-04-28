@@ -46,7 +46,7 @@ The system is organized in a monorepo structure containing the resources for bot
   │     ├── /services          # Business logic (isolated from views and serializers)
   │     ├── /tests             # Testing environment (pytest, factories)
   │     ├── Dockerfile         # Image build instructions for the Python container
-  │     ├── requirements.txt   # Backend dependencies list
+  │     ├── requirements/      # Pinned dependencies — base.txt (runtime), dev.txt (tests)
   │     ├── manage.py          # Native Django administration script
   │     └── CONTEXT.md         # Detailed Backend architecture documentation
   │
@@ -67,7 +67,7 @@ The system is organized in a monorepo structure containing the resources for bot
 
 ## Local Getting Started Guide
 
-Running the project on any machine is straightforward thanks to the native Docker implementation. The system will instantiate 3 services: `db` (PostgreSQL), `api`, and `web`.
+Running the project on any machine is straightforward thanks to the native Docker implementation. The system will instantiate 4 services: `db` (PostgreSQL), `redis`, `api`, and `web`.
 
 ### Prerequisites
 - Install Docker Desktop and have the ability to run `docker compose`.
@@ -96,6 +96,29 @@ Running the project on any machine is straightforward thanks to the native Docke
    - **Frontend:** [http://localhost:3000](http://localhost:3000)
    - **Backend API:** [http://localhost:8000](http://localhost:8000)
    - **Swagger (Documentation):** [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/)
+
+---
+
+## Production Hardening Notes (April 2026)
+
+The API was hardened for production deployment:
+
+- **Settings split into a package**: `core/settings/{base,dev,prod}.py`. Local dev defaults to `core.settings.dev`; deploy with `DJANGO_SETTINGS_MODULE=core.settings.prod`.
+- **HTTPS / HSTS / secure cookies** enforced in `prod.py`.
+- **Redis is now required** as the cache backend so DRF throttles work across multiple workers. Local Docker Compose includes it automatically; for non-Docker dev, `REDIS_URL` may be left unset and the dev settings fall back to in-memory cache.
+- **Pinned dependencies** are split into `api/requirements/base.txt` (runtime, installed in the image) and `api/requirements/dev.txt` (tests).
+- **Sentry** runs only in `prod.py`, with `traces_sample_rate=0.1` (override via `SENTRY_TRACES_SAMPLE_RATE`), `send_default_pii=False`, and a `before_send` hook that scrubs `Authorization` headers and `password`/`access`/`refresh` body fields.
+
+### Frontend-impacting change: registration response
+
+To stop email-enumeration attacks, `POST /api/auth/register/` no longer returns `400` when an email is already registered. Both new registrations and duplicate attempts return `201`, but the response shape differs:
+
+- **New registration** → `{ "access": "...", "refresh": "...", "user": { "id": "...", "email": "..." } }`
+- **Email already exists** → `{ "detail": "Registration received." }` (no tokens)
+
+The web app should treat the absence of `access`/`refresh` in a 201 response as "verify your email" UX (or whatever onboarding flow is appropriate) instead of an immediate logged-in state.
+
+The endpoint is also rate-limited (`AuthRateThrottle`, 10/minute by IP).
 
 ---
 
