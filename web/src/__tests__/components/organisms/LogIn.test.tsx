@@ -78,9 +78,9 @@ describe('LogIn', () => {
     );
   });
 
-  it('stores tokens and navigates to /home on success', async () => {
+  it('navigates to /home on success', async () => {
     const mutate = vi.fn().mockImplementation((_creds, { onSuccess }) => {
-      onSuccess({ access: 'acc-token', refresh: 'ref-token' });
+      onSuccess();
     });
     setupLogin(mutate);
     render(<LogIn />);
@@ -89,7 +89,6 @@ describe('LogIn', () => {
     await userEvent.type(screen.getByPlaceholderText('Password'), 'pass');
     await userEvent.click(screen.getByRole('button', { name: 'Login' }));
 
-    expect(tokenStorage.setTokens).toHaveBeenCalledWith('acc-token', 'ref-token');
     expect(mockPush).toHaveBeenCalledWith('/home');
   });
 

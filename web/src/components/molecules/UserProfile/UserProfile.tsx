@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useMe, useRevokeToken } from '../../../hooks/useAuth';
-import { tokenStorage } from '../../../lib/tokenStorage';
+
 
 function getInitials(email: string): string {
   return email
@@ -22,17 +22,12 @@ export function UserProfile() {
   const { mutate: revokeToken, isPending: isLoggingOut } = useRevokeToken();
 
   function handleLogout() {
-    const refresh = tokenStorage.getRefresh();
-    const clearAndRedirect = () => {
-      tokenStorage.clear();
-      queryClient.clear();
-      router.push('/auth/login');
-    };
-    if (refresh) {
-      revokeToken(refresh, { onSettled: clearAndRedirect });
-    } else {
-      clearAndRedirect();
-    }
+    revokeToken(undefined, {
+      onSettled: () => {
+        queryClient.clear();
+        router.push('/auth/login');
+      }
+    });
   }
 
   if (!user) return null;

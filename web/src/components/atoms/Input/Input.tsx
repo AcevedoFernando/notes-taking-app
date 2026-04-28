@@ -9,21 +9,23 @@ interface InputProps {
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
+  error?: string;
 }
 
-export function Input({ type = 'text', placeholder, value, onChange, className }: InputProps) {
+export function Input({ type = 'text', placeholder, value, onChange, className, error }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
   const resolvedType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <div className="relative w-full">
-      <input
-        type={resolvedType}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className={`w-full border border-secondary text-secondary px-3 py-2 rounded-[6px] outline-none focus:ring-1 focus:ring-secondary placeholder:text-secondary/50 ${type === 'password' ? 'pr-10' : ''} ${className ?? ''}`.trim()}
-      />
+    <div className="relative w-full flex flex-col gap-1">
+      <div className="relative w-full">
+        <input
+          type={resolvedType}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={`w-full border ${error ? 'border-red-500' : 'border-secondary'} text-secondary px-3 py-2 rounded-[6px] outline-none focus:ring-1 focus:ring-secondary placeholder:text-secondary/50 ${type === 'password' ? 'pr-10' : ''} ${className ?? ''}`.trim()}
+        />
       {type === 'password' && (
         <button
           type="button"
@@ -34,6 +36,8 @@ export function Input({ type = 'text', placeholder, value, onChange, className }
           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       )}
+      </div>
+      {error && <span className="text-xs text-red-500">{error}</span>}
     </div>
   );
 }

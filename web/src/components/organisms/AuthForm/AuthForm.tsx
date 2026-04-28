@@ -12,10 +12,11 @@ interface AuthFormProps {
   submitLabel: string;
   navLink: { href: string; text: string };
   isPending?: boolean;
+  errors?: Record<string, string[]>;
   onSubmit: (email: string, password: string) => void;
 }
 
-export function AuthForm({ illustration, title, submitLabel, navLink, isPending, onSubmit }: AuthFormProps) {
+export function AuthForm({ illustration, title, submitLabel, navLink, isPending, errors, onSubmit }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -45,12 +46,14 @@ export function AuthForm({ illustration, title, submitLabel, navLink, isPending,
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={errors?.email?.[0]}
           />
           <Input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={errors?.password?.[0]}
           />
         </div>
 

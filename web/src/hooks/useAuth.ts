@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { login, register, refreshToken, revokeToken, fetchMe } from '../lib/auth';
-import type { AuthCredentials } from '../lib/auth';
+import type { AuthCredentials, RegisterResponse } from '../lib/auth';
 
 export function useMe() {
   return useQuery({
@@ -20,8 +20,8 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  return useMutation({
-    mutationFn: (credentials: AuthCredentials) => register(credentials),
+  return useMutation<RegisterResponse, Error, AuthCredentials>({
+    mutationFn: (credentials) => register(credentials),
   });
 }
 
@@ -33,6 +33,6 @@ export function useRefreshToken() {
 
 export function useRevokeToken() {
   return useMutation({
-    mutationFn: (refresh: string) => revokeToken(refresh),
+    mutationFn: () => revokeToken(),
   });
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
 import { hexToRgba } from '../../../utils/hexToRgba';
 import type { Note, Category } from '../../../types';
@@ -13,9 +13,10 @@ interface NotePreviewProps {
 
 export const NotePreview = memo(function NotePreview({ note, category, onNoteClick }: NotePreviewProps) {
   const handleClick = useCallback(() => onNoteClick?.(note), [onNoteClick, note]);
-  const sanitizedContent = useMemo(() => {
-    if (typeof window === 'undefined') return note.content;
-    return DOMPurify.sanitize(note.content);
+  const [sanitizedContent, setSanitizedContent] = useState('');
+
+  useEffect(() => {
+    setSanitizedContent(DOMPurify.sanitize(note.content));
   }, [note.content]);
 
   const formattedDate = useMemo(() => {

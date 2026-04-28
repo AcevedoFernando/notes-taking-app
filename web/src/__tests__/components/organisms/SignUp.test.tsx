@@ -78,9 +78,9 @@ describe('SignUp', () => {
     );
   });
 
-  it('stores tokens and navigates to /home on success', async () => {
+  it('navigates to /home on success', async () => {
     const mutate = vi.fn().mockImplementation((_creds, { onSuccess }) => {
-      onSuccess({ access: 'acc-token', refresh: 'ref-token' });
+      onSuccess({ access: 'tok' });
     });
     setupRegister(mutate);
     render(<SignUp />);
@@ -89,8 +89,22 @@ describe('SignUp', () => {
     await userEvent.type(screen.getByPlaceholderText('Password'), 'pass');
     await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
 
-    expect(tokenStorage.setTokens).toHaveBeenCalledWith('acc-token', 'ref-token');
     expect(mockPush).toHaveBeenCalledWith('/home');
+  });
+
+  it('shows a confirmation message instead of redirecting when email already exists', async () => {
+    const mutate = vi.fn().mockImplementation((_creds, { onSuccess }) => {
+      onSuccess({ detail: 'Registration received.' });
+    });
+    setupRegister(mutate);
+    render(<SignUp />);
+
+    await userEvent.type(screen.getByPlaceholderText('Email'), 'existing@example.com');
+    await userEvent.type(screen.getByPlaceholderText('Password'), 'pass');
+    await userEvent.click(screen.getByRole('button', { name: 'Sign Up' }));
+
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByText(/check your inbox/i)).toBeInTheDocument();
   });
 
   it('shows "Loading…" and disables the button while registration is pending', () => {

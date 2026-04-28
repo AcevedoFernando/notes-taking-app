@@ -8,6 +8,10 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ clear: vi.fn() }),
+}));
+
 vi.mock('../../../hooks/useAuth', () => ({
   useMe: vi.fn(),
   useRevokeToken: vi.fn(),
@@ -83,42 +87,26 @@ describe('UserProfile', () => {
       expect(screen.getByRole('button', { name: /log out/i })).toBeInTheDocument();
     });
 
-    it('calls revokeToken with the refresh token when one exists', async () => {
+    it('calls revokeToken when clicked', async () => {
       const mutate = vi.fn();
       setupMocks({ mutate });
-      vi.mocked(tokenStorage.getRefresh).mockReturnValue('my-refresh-token');
 
       render(<UserProfile />);
       await userEvent.click(screen.getByRole('button', { name: /log out/i }));
 
       expect(mutate).toHaveBeenCalledWith(
-        'my-refresh-token',
+        undefined,
         expect.objectContaining({ onSettled: expect.any(Function) }),
       );
     });
 
-    it('clears tokens and redirects after revokeToken settles', async () => {
+    it('clears query client and redirects after revokeToken settles', async () => {
       const mutate = vi.fn().mockImplementation((_token, { onSettled }) => onSettled());
       setupMocks({ mutate });
-      vi.mocked(tokenStorage.getRefresh).mockReturnValue('my-refresh-token');
 
       render(<UserProfile />);
       await userEvent.click(screen.getByRole('button', { name: /log out/i }));
 
-      expect(tokenStorage.clear).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith('/auth/login');
-    });
-
-    it('clears tokens and redirects directly when there is no refresh token', async () => {
-      const mutate = vi.fn();
-      setupMocks({ mutate });
-      vi.mocked(tokenStorage.getRefresh).mockReturnValue(null);
-
-      render(<UserProfile />);
-      await userEvent.click(screen.getByRole('button', { name: /log out/i }));
-
-      expect(mutate).not.toHaveBeenCalled();
-      expect(tokenStorage.clear).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith('/auth/login');
     });
 

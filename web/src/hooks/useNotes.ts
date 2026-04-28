@@ -16,8 +16,18 @@ export function useNotes(categoryId?: string) {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (!lastPage.next) return undefined;
-      const page = lastPage.next;
-      return page ? Number(page) : undefined;
+      // Handle if the backend returns a raw page number (e.g., 2)
+      if (!String(lastPage.next).startsWith('http')) {
+        return Number(lastPage.next);
+      }
+      // Handle if the backend returns an absolute URL (e.g., http://api/notes?page=2)
+      try {
+        const url = new URL(lastPage.next);
+        const page = url.searchParams.get('page');
+        return page ? Number(page) : undefined;
+      } catch (e) {
+        return undefined;
+      }
     },
     staleTime: 2 * 60 * 1000,
   });
