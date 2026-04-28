@@ -120,6 +120,17 @@ The web app should treat the absence of `access`/`refresh` in a 201 response as 
 
 The endpoint is also rate-limited (`AuthRateThrottle`, 10/minute by IP).
 
+### Frontend Security Hardening
+- **BFF (Backend-For-Frontend) Proxy**: The Next.js web application now routes all API calls through an internal proxy (`/api/proxy/[...path]/route.ts`).
+- **HttpOnly Cookies**: JWT tokens (`access` and `refresh`) are intercepted by the proxy and stored securely as `HttpOnly` cookies. They are no longer exposed to the client-side JavaScript, significantly reducing the risk of token theft via XSS.
+- **Session Management**: On logout, the proxy automatically invalidates the token against the Django backend and strictly clears local cookies to guarantee complete session termination.
+
+### Testing via Docker
+The Docker configuration now installs development dependencies, including `pytest`. You can run the backend test suite directly inside the API container:
+```bash
+docker compose run --rm api pytest
+```
+
 ---
 
 ## Additional Relevant Information
